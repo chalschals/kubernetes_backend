@@ -40,4 +40,4 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl set image deployment/backend kubernets-backend=$ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
+        kubectl set image deployment/backend $IMAGE_NAME=$ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}

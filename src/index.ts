@@ -11,7 +11,7 @@ app.use(cors({ origin: "*" }));
 app.use("/users", userRoutes);
 
 app.get("/health", (req, res) => {
-  return res.send("Alive");
+  return res.send("Yes I am Alive!!!");
 });
 
 app.listen(port, () => {
