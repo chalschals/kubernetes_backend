@@ -1,0 +1,43 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+
+env:
+  ACR_NAME: chalsacrname
+  ACR_LOGIN_SERVER: chalsacrname.azurecr.io
+  AKS_RESOURCE_GROUP: myResourceGroup
+  AKS_CLUSTER_NAME: chalsAKSCluster
+  IMAGE_NAME: kubernets-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ACR Login
+      run: az acr login --name $ACR_NAME
+
+    - name: Build and Push Image
+      run: |
+        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }} .
+        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
+
+    - name: Set AKS context
+      uses: azure/aks-set-context@v3
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        resource-group: $AKS_RESOURCE_GROUP
+        cluster-name: $AKS_CLUSTER_NAME
+
+    - name: Deploy to AKS
+      run: |
+        kubectl set image deployment/backend backend=$ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
